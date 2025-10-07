@@ -1,74 +1,65 @@
-#include <LiquidCrystal.h>
+Control de Temperatura con Sensor TMP36 y LCD
 
-// Configuración de pines del LCD: RS, E, D4, D5, D6, D7
-LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+Descripción
+Este proyecto implementa un sistema de monitoreo de temperatura usando un Arduino UNO, un sensor TMP36, un display LCD 16x2, un LED y un ventilador (motor DC).
+El sistema mide la temperatura ambiente, la muestra en pantalla y actúa sobre el LED y el ventilador según tres condiciones de temperatura.
 
-// Pines del sistema
-const int TMP36_PIN = A0;  // Sensor TMP36
-const int LED_PIN = 7;     // LED indicador
-const int FAN_PIN = 9;     // Motor/ventilador
+Componentes utilizados
 
-float temperatura = 0;
+Arduino UNO	1	Microcontrolador principal
+Sensor TMP36	1	Sensor de temperatura analógico
+LCD 16x2	1	Pantalla para mostrar datos
+Potenciómetro 10kΩ	1	Control del contraste del LCD
+LED	1	Indicador visual
+Resistencia 220Ω	1	Limitadora de corriente para LED
+Motor DC o ventilador	1	Actuador controlado por temperatura
+Transistor NPN (ej. 2N2222 o TIP120)	1	Control de potencia del ventilador
+Diodo 1N4007	1	Protección del motor
+Resistencias adicionales (1kΩ aprox.)	1	Para base del transistor
 
-void setup() {
-  lcd.begin(16, 2);
-  pinMode(LED_PIN, OUTPUT);
-  pinMode(FAN_PIN, OUTPUT);
-  pinMode(TMP36_PIN, INPUT);
+Conexiones
 
-  lcd.print("Sensor TMP36");
-  delay(2000);
-  lcd.clear();
-}
+Componente	Pin Arduino	Descripción
+TMP36 OUT	A0	Entrada analógica
+TMP36 VCC	5V	Alimentación
+TMP36 GND	GND	Tierra
+LED (con resistencia)	D7	Indicador visual
+Base del transistor	D9	Control del ventilador
+Emisor del transistor	GND	Retorno
+Colector del transistor	Motor –	
+Motor +	5V	
+LCD RS	D12	Control RS
+LCD E	D11	Control Enable
+LCD D4–D7	D5–D2	Líneas de datos
+LCD RW	GND	Modo escritura
+LCD V0	Potenciómetro	Contraste
+LCD VSS/VDD	GND / 5V	Alimentación
 
-void loop() {
-  // Lectura del sensor TMP36
-  int valorADC = analogRead(TMP36_PIN);
-  float voltaje = (valorADC * 5.0) / 1024.0;
-  temperatura = (voltaje - 0.5) * 100.0;  // Conversión a °C
+Código fuente principal (temp_lcd.ino)
+El programa realiza las siguientes validaciones según la temperatura medida:
 
-  // Mostrar la temperatura
-  lcd.setCursor(0, 0);
-  lcd.print("Temp: ");
-  lcd.print(temperatura);
-  lcd.print(" C   "); // Espacios para limpiar valores anteriores
+Validación	Condición	Acción
+1	Temperatura ≤ 10 °C	LED parpadea y ventilador apagado
+2	11 °C ≤ Temperatura ≤ 25 °C	LED y ventilador apagados
+3	Temperatura ≥ 26 °C	LED encendido fijo y ventilador encendido
 
-  // -------------------------------
-  // Validación 1: Temperatura <= 10°C
-  // -------------------------------
-  if (temperatura <= 10) {
-    digitalWrite(FAN_PIN, LOW);   // Ventilador apagado
-    // Parpadeo del LED
-    digitalWrite(LED_PIN, HIGH);
-    delay(500);
-    digitalWrite(LED_PIN, LOW);
-    delay(500);
+La temperatura se muestra en el LCD junto con el estado del ventilador.
 
-    lcd.setCursor(0, 1);
-    lcd.print("Frio  FAN:OFF  ");
-  }
 
-  // -------------------------------
-  // Validación 2: 11°C <= Temp <= 25°C
-  // -------------------------------
-  else if (temperatura > 10 && temperatura <= 25) {
-    digitalWrite(LED_PIN, LOW);   // LED apagado
-    digitalWrite(FAN_PIN, LOW);   // Ventilador apagado
+Instrucciones de uso
 
-    lcd.setCursor(0, 1);
-    lcd.print("Normal FAN:OFF ");
-    delay(1000);
-  }
+Ensambla el circuito siguiendo las conexiones indicadas.
+Abre el IDE de Arduino o Tinkercad Circuits.
+Carga el archivo temp_lcd.ino.
+Abre el monitor serial o verifica la lectura en el LCD.
+Cambia la temperatura (simulada o real) y observa el comportamiento del LED y ventilador.
 
-  // -------------------------------
-  // Validación 3: Temperatura >= 26°C
-  // -------------------------------
-  else if (temperatura >= 26) {
-    digitalWrite(LED_PIN, HIGH);  // LED encendido fijo
-    digitalWrite(FAN_PIN, HIGH);  // Ventilador encendido
+Autor
 
-    lcd.setCursor(0, 1);
-    lcd.print("Calor  FAN:ON  ");
-    delay(1000);
-  }
-}
+Juan Camilo Yampuezan
+Danny Esneyder Rojas
+Brandon Delgado Yesid
+
+Universidad CESMAG
+Espacio académico: Sistemas Operativos – Laboratorio 4
+Docente: joan ayala
